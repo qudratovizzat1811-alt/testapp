@@ -140,7 +140,8 @@ const ACTIONS = {
   admin:   ["i-tool",  "Admin panel",             "Statistika, foydalanuvchilar, reklama"]
 };
 const tg = window.Telegram && window.Telegram.WebApp;
-const inTg = !!(tg && tg.initData);
+// Tugma (KeyboardButton) orqali ochilganda Telegram initData bermaydi - shuning uchun platformaga qaraymiz
+const inTg = !!(tg && ((tg.platform && tg.platform !== "unknown") || tg.initData));
 const q = new URLSearchParams(location.search);
 const isAdmin = q.get("admin") === "1";
 
@@ -160,7 +161,10 @@ document.addEventListener("click", e => {
   const it = e.target.closest(".item");
   if (it) {
     const a = it.dataset.a;
-    if (inTg) { try { tg.HapticFeedback && tg.HapticFeedback.impactOccurred("light"); } catch (_) {} tg.sendData(a); }
+    if (inTg) {
+      try { tg.HapticFeedback && tg.HapticFeedback.impactOccurred("light"); } catch (_) {}
+      try { tg.sendData(a); } catch (err) { say("Ilovani botdagi «📱 Ilovani ochish» tugmasi orqali oching"); }
+    }
     else say(`Telegramda: «${ACTIONS[a][1]}» botda ochiladi`);
     return;
   }
